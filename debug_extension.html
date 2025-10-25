@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Interviewer - Extension Debug</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .debug-section h3 {
+            color: #374151;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .result {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+        .instructions {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Smart Interviewer Extension Debug</h1>
+        
+        <div class="instructions">
+            <h3>📋 Debug Instructions:</h3>
+            <ol>
+                <li><strong>Make sure backend is running:</strong> <code>python start_backend.py</code></li>
+                <li><strong>Load the extension in Chrome:</strong> Go to <code>chrome://extensions/</code> → Load unpacked</li>
+                <li><strong>Open this page in Chrome</strong> (not just file://)</li>
+                <li><strong>Test the extension</strong> using the buttons below</li>
+            </ol>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔗 Backend Connection Test</h3>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <div id="backend-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>🎤 Extension Test</h3>
+            <button onclick="testExtension()">Test Extension Communication</button>
+            <div id="extension-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>🎯 Full Interview Test</h3>
+            <p>This will test the complete interview flow with the extension.</p>
+            <button onclick="testInterview()">Start Interview Test</button>
+            <div id="interview-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>📊 Console Logs</h3>
+            <p>Open Chrome DevTools (F12) and check the Console tab for detailed logs.</p>
+            <button onclick="showConsoleInstructions()">Show Console Instructions</button>
+            <div id="console-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing backend connection...';
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Backend Connected!\n\nStatus: ${data.status}\nAI Provider: ${data.ai_provider}\nTimestamp: ${data.timestamp}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Backend Connection Failed!\n\nError: ${error.message}\n\nMake sure the backend is running on http://localhost:5000`;
+            }
+        }
+
+        async function testExtension() {
+            const resultDiv = document.getElementById('extension-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing extension communication...';
+
+            try {
+                // Check if extension is loaded
+                if (typeof chrome === 'undefined' || !chrome.runtime) {
+                    throw new Error('Chrome extension API not available. Make sure you are in Chrome and the extension is loaded.');
+                }
+
+                // Test extension communication
+                const response = await new Promise((resolve, reject) => {
+                    chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve(response);
+                        }
+                    });
+                });
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Extension Communication Working!\n\nResponse: ${JSON.stringify(response, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Extension Communication Failed!\n\nError: ${error.message}\n\nMake sure the extension is loaded and this page is in the same tab.`;
+            }
+        }
+
+        async function testInterview() {
+            const resultDiv = document.getElementById('interview-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing interview flow...';
+
+            try {
+                // Test question generation
+                const questionsResponse = await fetch(`${API_BASE}/api/suggest-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        context: 'Software Engineer interview',
+                        type: 'general',
+                        count: 3,
+                        previous_questions: [],
+                        candidate_info: { role: 'Software Engineer', experience_level: 'mid' }
+                    })
+                });
+
+                const questionsData = await questionsResponse.json();
+                if (!questionsData.success) throw new Error('Question generation failed');
+
+                // Test answer analysis
+                const analysisResponse = await fetch(`${API_BASE}/api/analyze-answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: questionsData.questions[0].question,
+                        answer: 'I am a software engineer with 5 years of experience in full-stack development.',
+                        context: { role: 'Software Engineer', experience_level: 'mid' }
+                    })
+                });
+
+                const analysisData = await analysisResponse.json();
+                if (!analysisData.success) throw new Error('Answer analysis failed');
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Interview Flow Test Successful!\n\n` +
+                    `Questions Generated: ${questionsData.questions.length}\n` +
+                    `Sample Question: ${questionsData.questions[0].question}\n` +
+                    `Answer Rating: ${analysisData.analysis.overall_rating}/10\n\n` +
+                    `The extension should work correctly now!`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Interview Flow Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        function showConsoleInstructions() {
+            const resultDiv = document.getElementById('console-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = `📊 Console Debug Instructions:\n\n` +
+                `1. Open Chrome DevTools (F12)\n` +
+                `2. Go to Console tab\n` +
+                `3. Look for these messages:\n` +
+                `   - "Smart Interviewer content script loaded"\n` +
+                `   - "✅ AI questions generated successfully"\n` +
+                `   - "✅ AI answer analysis successful"\n` +
+                `   - Any error messages in red\n\n` +
+                `4. Test the extension by:\n` +
+                `   - Clicking the Smart Interviewer icon\n` +
+                `   - Clicking "Start Interview"\n` +
+                `   - Watch the console for logs\n\n` +
+                `5. If you see CORS errors, the backend might not be running\n` +
+                `6. If you see "Extension not found" errors, reload the extension`;
+        }
+
+        // Auto-test backend on page load
+        window.onload = function() {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

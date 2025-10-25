@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Smart Interviewer</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="container">
+        <header class="settings-header">
+            <h1>⚙️ Smart Interviewer Settings</h1>
+            <p>Configure your AI provider and interview preferences</p>
+        </header>
+
+        <div class="settings-content">
+            <!-- AI Provider Configuration -->
+            <section class="settings-section">
+                <h2>🤖 AI Provider Configuration</h2>
+                <div class="form-group">
+                    <label for="ai-provider">AI Provider</label>
+                    <select id="ai-provider" class="form-control">
+                        <option value="gemini">Google Gemini (Recommended)</option>
+                        <option value="openai">OpenAI GPT</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                    </select>
+                    <small class="form-help">Choose your preferred AI provider for question generation and answer analysis</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="api-key">API Key</label>
+                    <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+                    <small class="form-help">Your API key is stored locally and never shared</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <select id="model" class="form-control">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Latest)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Alternative)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Alternative)</option>
+                    </select>
+                    <small class="form-help">Select the AI model to use</small>
+                </div>
+
+                <button id="test-connection" class="btn btn-secondary">Test Connection</button>
+                <div id="connection-status" class="status-message"></div>
+            </section>
+
+            <!-- Interview Preferences -->
+            <section class="settings-section">
+                <h2>📋 Interview Preferences</h2>
+                
+                <div class="form-group">
+                    <label for="question-type">Default Question Type</label>
+                    <select id="question-type" class="form-control">
+                        <option value="general">General</option>
+                        <option value="technical">Technical</option>
+                        <option value="behavioral">Behavioral</option>
+                        <option value="leadership">Leadership</option>
+                        <option value="culture_fit">Culture Fit</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-count">Questions per Session</label>
+                    <input type="number" id="question-count" class="form-control" min="3" max="20" value="8">
+                </div>
+
+                <div class="form-group">
+                    <label for="auto-suggestions">Auto-suggest Follow-ups</label>
+                    <input type="checkbox" id="auto-suggestions" checked>
+                    <small class="form-help">Automatically suggest follow-up questions based on answers</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="real-time-rating">Real-time Answer Rating</label>
+                    <input type="checkbox" id="real-time-rating" checked>
+                    <small class="form-help">Show rating immediately after each answer</small>
+                </div>
+            </section>
+
+            <!-- Notification Settings -->
+            <section class="settings-section">
+                <h2>🔔 Notifications</h2>
+                
+                <div class="form-group">
+                    <label for="notifications">Enable Notifications</label>
+                    <input type="checkbox" id="notifications" checked>
+                    <small class="form-help">Show notifications for high ratings and important events</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="rating-threshold">Rating Notification Threshold</label>
+                    <input type="range" id="rating-threshold" min="1" max="10" value="8" class="form-range">
+                    <div class="range-labels">
+                        <span>1 (All ratings)</span>
+                        <span id="threshold-value">8</span>
+                        <span>10 (Excellent only)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Management -->
+            <section class="settings-section">
+                <h2>💾 Data Management</h2>
+                
+                <div class="form-group">
+                    <label for="data-retention">Data Retention (days)</label>
+                    <select id="data-retention" class="form-control">
+                        <option value="7">7 days</option>
+                        <option value="30" selected>30 days</option>
+                        <option value="90">90 days</option>
+                        <option value="365">1 year</option>
+                        <option value="-1">Forever</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button id="export-data" class="btn btn-outline">Export Data</button>
+                    <button id="clear-data" class="btn btn-danger">Clear All Data</button>
+                </div>
+            </section>
+        </div>
+
+        <footer class="settings-footer">
+            <div class="footer-actions">
+                <button id="save-settings" class="btn btn-primary">Save Settings</button>
+                <button id="reset-settings" class="btn btn-secondary">Reset to Defaults</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>

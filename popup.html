@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Interviewer</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Smart Interviewer</h1>
+            <p>AI-powered interview assistant</p>
+        </div>
+        
+        <div class="status-section">
+            <div id="status" class="status stopped">
+                <span class="status-icon">⏹️</span>
+                <span class="status-text">Ready to start</span>
+            </div>
+        </div>
+        
+        <div class="resume-section">
+            <h4>📄 Candidate Resume (Optional)</h4>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt" style="margin-bottom: 10px;">
+            <div id="resumeInfo" class="resume-info" style="display: none;">
+                <small>Resume loaded: <span id="resumeName"></span></small>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-primary">
+                <span class="btn-icon">▶️</span>
+                Start Interview
+            </button>
+            <button id="stopBtn" class="btn btn-secondary" disabled>
+                <span class="btn-icon">⏹️</span>
+                Stop Interview
+            </button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Questions Asked:</span>
+                <span id="questionCount" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg Rating:</span>
+                <span id="avgRating" class="stat-value">-</span>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button id="viewReportBtn" class="btn btn-outline" disabled>
+                📊 View Report
+            </button>
+            <button id="settingsBtn" class="btn btn-outline">
+                ⚙️ Settings
+            </button>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

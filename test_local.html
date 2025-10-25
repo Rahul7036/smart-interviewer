@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Interviewer - Local Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #374151;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+        .question-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .rating {
+            font-size: 18px;
+            font-weight: bold;
+            color: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Smart Interviewer - Local Test Interface</h1>
+        
+        <!-- Backend Connection Test -->
+        <div class="test-section">
+            <h3>🔗 Backend Connection Test</h3>
+            <button onclick="testConnection()">Test Backend Connection</button>
+            <div id="connection-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Question Generation Test -->
+        <div class="test-section">
+            <h3>❓ Question Generation Test</h3>
+            <div class="form-group">
+                <label for="context">Interview Context:</label>
+                <input type="text" id="context" value="Software Engineer interview" placeholder="e.g., Software Engineer interview">
+            </div>
+            <div class="form-group">
+                <label for="questionType">Question Type:</label>
+                <select id="questionType">
+                    <option value="general">General</option>
+                    <option value="technical">Technical</option>
+                    <option value="behavioral">Behavioral</option>
+                    <option value="leadership">Leadership</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="questionCount">Number of Questions:</label>
+                <input type="number" id="questionCount" value="5" min="1" max="10">
+            </div>
+            <button onclick="generateQuestions()">Generate Questions</button>
+            <div id="questions-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Answer Analysis Test -->
+        <div class="test-section">
+            <h3>📊 Answer Analysis Test (Voice + Text)</h3>
+            <div class="form-group">
+                <label for="testQuestion">Question:</label>
+                <input type="text" id="testQuestion" value="Tell me about yourself" placeholder="Enter a question">
+            </div>
+            <div class="form-group">
+                <label for="testAnswer">Answer (Voice or Text):</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button id="startListening" onclick="startListening()" style="background: #10b981;">🎤 Start Listening</button>
+                    <button id="stopListening" onclick="stopListening()" style="background: #ef4444;" disabled>⏹️ Stop Listening</button>
+                    <span id="listeningStatus" style="color: #6b7280; align-self: center;">Ready to listen</span>
+                </div>
+                <textarea id="testAnswer" placeholder="Your answer will appear here when you speak, or type manually">I am a software engineer with 5 years of experience in full-stack development. I have worked with technologies like React, Node.js, and Python. I enjoy solving complex problems and working in collaborative teams. In my previous role, I led a team of 3 developers and successfully delivered a major project that improved our application's performance by 40%.</textarea>
+            </div>
+            <button onclick="analyzeAnswer()">Analyze Answer</button>
+            <div id="analysis-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Follow-up Questions Test -->
+        <div class="test-section">
+            <h3>🔄 Follow-up Questions Test</h3>
+            <div class="form-group">
+                <label for="followupQuestion">Original Question:</label>
+                <input type="text" id="followupQuestion" value="Tell me about a challenging project you worked on" placeholder="Enter original question">
+            </div>
+            <div class="form-group">
+                <label for="followupAnswer">Answer:</label>
+                <textarea id="followupAnswer" placeholder="Enter the answer">I worked on a project to migrate our legacy system to microservices architecture. The main challenge was ensuring zero downtime during the migration while maintaining data consistency across services.</textarea>
+            </div>
+            <button onclick="generateFollowup()">Generate Follow-up Questions</button>
+            <div id="followup-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Voice Interview Simulation -->
+        <div class="test-section">
+            <h3>🎯 Voice Interview Simulation</h3>
+            <p>Complete voice interview with real-time speech recognition and AI analysis.</p>
+            <div style="margin-bottom: 15px;">
+                <button id="startInterview" onclick="startVoiceInterview()" style="background: #10b981;">🎤 Start Voice Interview</button>
+                <button id="stopInterview" onclick="stopVoiceInterview()" style="background: #ef4444;" disabled>⏹️ Stop Interview</button>
+                <span id="interviewStatus" style="color: #6b7280; margin-left: 15px;">Ready to start</span>
+            </div>
+            <div id="currentQuestion" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 15px; margin-bottom: 15px; display: none;">
+                <strong>Current Question:</strong> <span id="questionText"></span>
+            </div>
+            <div id="currentAnswer" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 15px; margin-bottom: 15px; display: none;">
+                <strong>Your Answer:</strong> <span id="answerText"></span>
+            </div>
+            <div id="currentRating" style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin-bottom: 15px; display: none;">
+                <strong>AI Rating:</strong> <span id="ratingValue" class="rating"></span>
+            </div>
+            <div id="interview-results" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Full Interview Simulation -->
+        <div class="test-section">
+            <h3>🤖 Automated Interview Simulation</h3>
+            <p>This will simulate a complete interview with multiple Q&A cycles (automated).</p>
+            <button onclick="simulateInterview()">Start Automated Simulation</button>
+            <div id="simulation-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        // Speech Recognition Variables
+        let recognition = null;
+        let isListening = false;
+        let isInterviewActive = false;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let interviewData = {
+            questions: [],
+            answers: [],
+            ratings: []
+        };
+
+        // Initialize Speech Recognition
+        function initializeSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = () => {
+                    isListening = true;
+                    updateListeningStatus('Listening...', '#10b981');
+                    document.getElementById('startListening').disabled = true;
+                    document.getElementById('stopListening').disabled = false;
+                };
+                
+                recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    if (finalTranscript) {
+                        document.getElementById('testAnswer').value = finalTranscript;
+                        if (isInterviewActive) {
+                            handleInterviewAnswer(finalTranscript);
+                        }
+                    } else if (interimTranscript) {
+                        document.getElementById('testAnswer').value = interimTranscript + '...';
+                    }
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    updateListeningStatus('Error: ' + event.error, '#ef4444');
+                    stopListening();
+                };
+                
+                recognition.onend = () => {
+                    isListening = false;
+                    updateListeningStatus('Stopped', '#6b7280');
+                    document.getElementById('startListening').disabled = false;
+                    document.getElementById('stopListening').disabled = true;
+                };
+            } else {
+                alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+            }
+        }
+
+        function updateListeningStatus(text, color) {
+            const status = document.getElementById('listeningStatus');
+            status.textContent = text;
+            status.style.color = color;
+        }
+
+        function startListening() {
+            if (!recognition) {
+                initializeSpeechRecognition();
+            }
+            if (recognition && !isListening) {
+                recognition.start();
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+        }
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing connection...';
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Backend Connected!\n\nStatus: ${data.status}\nAI Provider: ${data.ai_provider}\nTimestamp: ${data.timestamp}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Connection Failed!\n\nError: ${error.message}\n\nMake sure the backend is running on http://localhost:5000`;
+            }
+        }
+
+        async function generateQuestions() {
+            const resultDiv = document.getElementById('questions-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Generating questions...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/suggest-questions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        context: document.getElementById('context').value,
+                        type: document.getElementById('questionType').value,
+                        count: parseInt(document.getElementById('questionCount').value),
+                        previous_questions: [],
+                        candidate_info: {
+                            role: 'Software Engineer',
+                            experience_level: 'mid'
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultDiv.className = 'result success';
+                    let resultText = `✅ Questions Generated Successfully!\n\n`;
+                    data.questions.forEach((q, index) => {
+                        resultText += `${index + 1}. ${q.question}\n`;
+                        resultText += `   Category: ${q.category}\n`;
+                        resultText += `   Difficulty: ${q.difficulty}\n`;
+                        resultText += `   Purpose: ${q.purpose}\n\n`;
+                    });
+                    resultDiv.textContent = resultText;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Question Generation Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function analyzeAnswer() {
+            const resultDiv = document.getElementById('analysis-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Analyzing answer...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze-answer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: document.getElementById('testQuestion').value,
+                        answer: document.getElementById('testAnswer').value,
+                        context: {
+                            role: 'Software Engineer',
+                            experience_level: 'mid'
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultDiv.className = 'result success';
+                    const analysis = data.analysis;
+                    let resultText = `✅ Answer Analysis Complete!\n\n`;
+                    resultText += `Overall Rating: ${analysis.overall_rating}/10\n\n`;
+                    resultText += `Detailed Scores:\n`;
+                    resultText += `- Relevance: ${analysis.detailed_scores.relevance}/10\n`;
+                    resultText += `- Completeness: ${analysis.detailed_scores.completeness}/10\n`;
+                    resultText += `- Clarity: ${analysis.detailed_scores.clarity}/10\n`;
+                    resultText += `- Specificity: ${analysis.detailed_scores.specificity}/10\n`;
+                    resultText += `- Professionalism: ${analysis.detailed_scores.professionalism}/10\n\n`;
+                    resultText += `Strengths:\n`;
+                    analysis.strengths.forEach(strength => {
+                        resultText += `- ${strength}\n`;
+                    });
+                    resultText += `\nAreas for Improvement:\n`;
+                    analysis.weaknesses.forEach(weakness => {
+                        resultText += `- ${weakness}\n`;
+                    });
+                    resultText += `\nSuggestions:\n`;
+                    analysis.suggestions.forEach(suggestion => {
+                        resultText += `- ${suggestion}\n`;
+                    });
+                    resultDiv.textContent = resultText;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Answer Analysis Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function generateFollowup() {
+            const resultDiv = document.getElementById('followup-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Generating follow-up questions...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/suggest-followup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: document.getElementById('followupQuestion').value,
+                        answer: document.getElementById('followupAnswer').value,
+                        qa_history: []
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultDiv.className = 'result success';
+                    let resultText = `✅ Follow-up Questions Generated!\n\n`;
+                    data.followup_questions.forEach((q, index) => {
+                        resultText += `${index + 1}. ${q.question}\n`;
+                        resultText += `   Relevance: ${q.relevance}\n`;
+                        resultText += `   Purpose: ${q.purpose}\n\n`;
+                    });
+                    resultDiv.textContent = resultText;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Follow-up Generation Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function simulateInterview() {
+            const resultDiv = document.getElementById('simulation-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Starting interview simulation...\n\n';
+
+            try {
+                // Step 1: Generate initial questions
+                resultDiv.textContent += 'Step 1: Generating initial questions...\n';
+                const questionsResponse = await fetch(`${API_BASE}/api/suggest-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        context: 'Software Engineer interview',
+                        type: 'general',
+                        count: 3,
+                        previous_questions: [],
+                        candidate_info: { role: 'Software Engineer', experience_level: 'mid' }
+                    })
+                });
+
+                const questionsData = await questionsResponse.json();
+                if (!questionsData.success) throw new Error('Failed to generate questions');
+
+                resultDiv.textContent += `✅ Generated ${questionsData.questions.length} questions\n\n`;
+
+                // Step 2: Simulate Q&A cycles
+                let totalRating = 0;
+                let questionCount = 0;
+
+                for (let i = 0; i < Math.min(3, questionsData.questions.length); i++) {
+                    const question = questionsData.questions[i];
+                    resultDiv.textContent += `Question ${i + 1}: ${question.question}\n`;
+                    
+                    // Simulate answer
+                    const sampleAnswer = `This is a sample answer for question ${i + 1}. I would provide a detailed response about my experience and skills related to this topic.`;
+                    resultDiv.textContent += `Sample Answer: ${sampleAnswer}\n`;
+                    
+                    // Analyze the answer
+                    const analysisResponse = await fetch(`${API_BASE}/api/analyze-answer`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            question: question.question,
+                            answer: sampleAnswer,
+                            context: { role: 'Software Engineer', experience_level: 'mid' }
+                        })
+                    });
+
+                    const analysisData = await analysisResponse.json();
+                    if (analysisData.success) {
+                        const rating = analysisData.analysis.overall_rating;
+                        totalRating += rating;
+                        questionCount++;
+                        resultDiv.textContent += `Rating: ${rating}/10\n\n`;
+                    }
+                }
+
+                // Step 3: Calculate average
+                const averageRating = questionCount > 0 ? (totalRating / questionCount).toFixed(1) : 0;
+                resultDiv.textContent += `\n🎯 Interview Simulation Complete!\n`;
+                resultDiv.textContent += `Questions Asked: ${questionCount}\n`;
+                resultDiv.textContent += `Average Rating: ${averageRating}/10\n`;
+                resultDiv.textContent += `\n✅ All AI services are working correctly!`;
+
+                resultDiv.className = 'result success';
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `\n❌ Simulation Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        // Voice Interview Functions
+        async function startVoiceInterview() {
+            try {
+                // Generate initial questions
+                const response = await fetch(`${API_BASE}/api/suggest-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        context: 'Software Engineer interview',
+                        type: 'general',
+                        count: 5,
+                        previous_questions: [],
+                        candidate_info: { role: 'Software Engineer', experience_level: 'mid' }
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) throw new Error('Failed to generate questions');
+
+                currentQuestions = data.questions;
+                currentQuestionIndex = 0;
+                isInterviewActive = true;
+                interviewData = { questions: [], answers: [], ratings: [] };
+
+                // Update UI
+                document.getElementById('startInterview').disabled = true;
+                document.getElementById('stopInterview').disabled = false;
+                document.getElementById('interviewStatus').textContent = 'Interview Active';
+                document.getElementById('interviewStatus').style.color = '#10b981';
+
+                // Show first question
+                showCurrentQuestion();
+                
+                // Start listening
+                startListening();
+
+            } catch (error) {
+                alert('Failed to start interview: ' + error.message);
+            }
+        }
+
+        function stopVoiceInterview() {
+            isInterviewActive = false;
+            stopListening();
+            
+            // Update UI
+            document.getElementById('startInterview').disabled = false;
+            document.getElementById('stopInterview').disabled = true;
+            document.getElementById('interviewStatus').textContent = 'Interview Stopped';
+            document.getElementById('interviewStatus').style.color = '#6b7280';
+            
+            // Hide interview elements
+            document.getElementById('currentQuestion').style.display = 'none';
+            document.getElementById('currentAnswer').style.display = 'none';
+            document.getElementById('currentRating').style.display = 'none';
+            
+            // Show results
+            showInterviewResults();
+        }
+
+        function showCurrentQuestion() {
+            if (currentQuestionIndex < currentQuestions.length) {
+                const question = currentQuestions[currentQuestionIndex];
+                document.getElementById('questionText').textContent = question.question;
+                document.getElementById('currentQuestion').style.display = 'block';
+                document.getElementById('currentAnswer').style.display = 'none';
+                document.getElementById('currentRating').style.display = 'none';
+            } else {
+                stopVoiceInterview();
+            }
+        }
+
+        async function handleInterviewAnswer(answer) {
+            if (!isInterviewActive) return;
+
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Show answer
+            document.getElementById('answerText').textContent = answer;
+            document.getElementById('currentAnswer').style.display = 'block';
+            
+            // Stop listening temporarily
+            stopListening();
+            
+            try {
+                // Analyze the answer
+                const response = await fetch(`${API_BASE}/api/analyze-answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question.question,
+                        answer: answer,
+                        context: { role: 'Software Engineer', experience_level: 'mid' }
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    const rating = data.analysis.overall_rating;
+                    document.getElementById('ratingValue').textContent = `${rating}/10`;
+                    document.getElementById('currentRating').style.display = 'block';
+                    
+                    // Store data
+                    interviewData.questions.push(question);
+                    interviewData.answers.push({ answer: answer });
+                    interviewData.ratings.push(rating);
+                    
+                    // Move to next question after a delay
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        if (currentQuestionIndex < currentQuestions.length) {
+                            showCurrentQuestion();
+                            startListening(); // Resume listening
+                        } else {
+                            stopVoiceInterview();
+                        }
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error analyzing answer:', error);
+                // Continue to next question anyway
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < currentQuestions.length) {
+                        showCurrentQuestion();
+                        startListening();
+                    } else {
+                        stopVoiceInterview();
+                    }
+                }, 2000);
+            }
+        }
+
+        function showInterviewResults() {
+            const resultDiv = document.getElementById('interview-results');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result success';
+            
+            let resultText = `🎯 Voice Interview Complete!\n\n`;
+            resultText += `Questions Asked: ${interviewData.questions.length}\n`;
+            
+            if (interviewData.ratings.length > 0) {
+                const avgRating = interviewData.ratings.reduce((sum, rating) => sum + rating, 0) / interviewData.ratings.length;
+                resultText += `Average Rating: ${avgRating.toFixed(1)}/10\n\n`;
+                
+                resultText += `Question-by-Question Results:\n`;
+                for (let i = 0; i < interviewData.questions.length; i++) {
+                    resultText += `${i + 1}. ${interviewData.questions[i].question}\n`;
+                    resultText += `   Rating: ${interviewData.ratings[i]}/10\n`;
+                    resultText += `   Answer: ${interviewData.answers[i].answer.substring(0, 100)}...\n\n`;
+                }
+            }
+            
+            resultDiv.textContent = resultText;
+        }
+
+        // Auto-test connection on page load
+        window.onload = function() {
+            testConnection();
+            initializeSpeechRecognition();
+        };
+    </script>
+</body>
+</html>

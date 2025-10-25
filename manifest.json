@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Interviewer",
+  "version": "1.0.0",
+  "description": "AI-powered interview assistant that suggests questions, rates answers, and generates detailed reports",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Smart Interviewer"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content.js", "content.css", "inject_content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
